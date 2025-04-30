@@ -1,7 +1,6 @@
 `timescale 1ns / 1ps
 
 // passive checker for one link. drives nothing, fits any link
-// counts nothing yet, it only shouts
 
 module axis_protocol_checker #(
     parameter integer DATA_W = 32,
@@ -22,9 +21,15 @@ module axis_protocol_checker #(
     reg              tlast_prev_q;
 
     integer errors;
+    integer transfers;
+    integer packets;
+    integer stall_cycles;
 
     initial begin
         errors         = 0;
+        transfers      = 0;
+        packets        = 0;
+        stall_cycles   = 0;
         aresetn_prev_q = 1'b0;
         tvalid_prev_q  = 1'b0;
         tready_prev_q  = 1'b0;
@@ -41,6 +46,16 @@ module axis_protocol_checker #(
         end
 
         if (aresetn) begin
+
+            // the handshake wires must never be unknown once out of reset
+            if (tvalid !== 1'b0 && tvalid !== 1'b1) begin
+                $display("[%0t] %s CHECK FAIL: TVALID is X or Z", $time, NAME);
+                errors = errors + 1;
+            end
+            if (tready !== 1'b0 && tready !== 1'b1) begin
+                $display("[%0t] %s CHECK FAIL: TREADY is X or Z", $time, NAME);
+                errors = errors + 1;
+            end
 
             //  spec 2.7.2 and Figure 2-4: TVALID may only rise at an edge after an
             if (!aresetn_prev_q && tvalid === 1'b1) begin
@@ -66,6 +81,27 @@ module axis_protocol_checker #(
                     errors = errors + 1;
                 end
             end
+
+            // the payload must not be unknown while it is being offered
+            if (tvalid === 1'b1) begin
+                if ((^tdata) === 1'bx) begin
+                    $display("[%0t] %s CHECK FAIL: TDATA has X bits while TVALID is high", $time, NAME);
+                    errors = errors + 1;
+                end
+                if (tlast !== 1'b0 && tlast !== 1'b1) begin
+                    $display("[%0t] %s CHECK FAIL: TLAST is X while TVALID is high", $time, NAME);
+                    errors = errors + 1;
+                end
+            end
+
+            // bookkeeping for the summary
+            if (tvalid === 1'b1 && tready !== 1'b1)
+                stall_cycles = stall_cycles + 1;
+            if (tvalid === 1'b1 && tready === 1'b1) begin
+                transfers = transfers + 1;
+                if (tlast === 1'b1)
+                    packets = packets + 1;
+            end
         end
 
         // remember this edge for the next one
@@ -75,5 +111,12 @@ module axis_protocol_checker #(
         tdata_prev_q   <= tdata;
         tlast_prev_q   <= tlast;
     end
+
+    task report;
+        begin
+            $display("CHECKER %s: %0d transfers, %0d packets, %0d stall cycles, %0d rule violations",
+                     NAME, transfers, packets, stall_cycles, errors);
+        end
+    endtask
 
 endmodule
