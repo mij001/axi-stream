@@ -7,7 +7,9 @@ SEED    ?= 1
 PAUSE   ?= 30
 STARTP  ?= 10
 
-all: lint run random
+ALL_RTL := $(RTL) rtl/axis_slave_flags.v
+
+all: lint run random equiv
 
 $(SIMDIR):
 	@mkdir -p $(SIMDIR)
@@ -16,6 +18,9 @@ $(SIMDIR)/tb_axis_basic.vvp: $(RTL) $(CHECKER) tb/tb_axis_basic.v | $(SIMDIR)
 	iverilog -g2005 -o $@ $^
 
 $(SIMDIR)/tb_axis_random.vvp: $(RTL) $(CHECKER) tb/tb_axis_random.v | $(SIMDIR)
+	iverilog -g2005 -o $@ $^
+
+$(SIMDIR)/tb_slave_equiv.vvp: $(ALL_RTL) $(CHECKER) tb/tb_slave_equiv.v | $(SIMDIR)
 	iverilog -g2005 -o $@ $^
 
 run: $(SIMDIR)/tb_axis_basic.vvp
@@ -29,11 +34,15 @@ regress: $(SIMDIR)/tb_axis_random.vvp
 	  vvp $(SIMDIR)/tb_axis_random.vvp +seed=$$s +pause_pct=$(PAUSE) +start_pct=$(STARTP) | grep -E 'RESULT' | sed "s/^/seed $$s: /"; \
 	done
 
+equiv: $(SIMDIR)/tb_slave_equiv.vvp
+	vvp $(SIMDIR)/tb_slave_equiv.vvp +seed=$(SEED)
+
 lint:
 	verilator --lint-only -Wall --top-module axis_master_basic rtl/axis_master_basic.v
 	verilator --lint-only -Wall --top-module axis_slave_basic rtl/axis_slave_basic.v
+	verilator --lint-only -Wall --top-module axis_slave_flags rtl/axis_slave_flags.v
 
 clean:
 	rm -rf $(SIMDIR)
 
-.PHONY: all run random regress lint clean
+.PHONY: all run random regress equiv lint clean
