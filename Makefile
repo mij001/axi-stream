@@ -23,6 +23,9 @@ $(SIMDIR)/tb_axis_random.vvp: $(RTL) $(CHECKER) tb/tb_axis_random.v | $(SIMDIR)
 $(SIMDIR)/tb_slave_equiv.vvp: $(ALL_RTL) $(CHECKER) tb/tb_slave_equiv.v | $(SIMDIR)
 	iverilog -g2005 -o $@ $^
 
+$(SIMDIR)/tb_slave_trace.vvp: $(ALL_RTL) tb/tb_slave_trace.v | $(SIMDIR)
+	iverilog -g2005 -o $@ $^
+
 run: $(SIMDIR)/tb_axis_basic.vvp
 	vvp $(SIMDIR)/tb_axis_basic.vvp
 
@@ -37,6 +40,9 @@ regress: $(SIMDIR)/tb_axis_random.vvp
 equiv: $(SIMDIR)/tb_slave_equiv.vvp
 	vvp $(SIMDIR)/tb_slave_equiv.vvp +seed=$(SEED)
 
+trace: $(SIMDIR)/tb_slave_trace.vvp
+	vvp $(SIMDIR)/tb_slave_trace.vvp
+
 lint:
 	verilator --lint-only -Wall --top-module axis_master_basic rtl/axis_master_basic.v
 	verilator --lint-only -Wall --top-module axis_slave_basic rtl/axis_slave_basic.v
@@ -45,4 +51,4 @@ lint:
 clean:
 	rm -rf $(SIMDIR)
 
-.PHONY: all run random regress equiv lint clean
+.PHONY: all run random regress equiv trace lint clean
