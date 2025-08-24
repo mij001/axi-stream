@@ -43,6 +43,16 @@ equiv: $(SIMDIR)/tb_slave_equiv.vvp
 trace: $(SIMDIR)/tb_slave_trace.vvp
 	vvp $(SIMDIR)/tb_slave_trace.vvp
 
+demos: | $(SIMDIR)
+	@for d in demo_01_nonblocking demo_03_deadlock demo_04_counter demo_05_two_timelines demo_06_registered_deadlock; do \
+	  echo "=== $$d"; iverilog -g2005 -o $(SIMDIR)/$$d.vvp demos/$$d.v && vvp $(SIMDIR)/$$d.vvp; \
+	done
+	@echo "=== demo_07_checker_catches"
+	@iverilog -g2005 -o $(SIMDIR)/demo_07.vvp rtl/axis_slave_basic.v $(CHECKER) demos/demo_07_checker_catches.v && vvp $(SIMDIR)/demo_07.vvp
+
+wave: run
+	gtkwave $(SIMDIR)/tb_axis_basic.vcd &
+
 lint:
 	verilator --lint-only -Wall --top-module axis_master_basic rtl/axis_master_basic.v
 	verilator --lint-only -Wall --top-module axis_slave_basic rtl/axis_slave_basic.v
@@ -51,4 +61,4 @@ lint:
 clean:
 	rm -rf $(SIMDIR)
 
-.PHONY: all run random regress equiv trace lint clean
+.PHONY: all run random regress equiv trace demos wave lint clean
