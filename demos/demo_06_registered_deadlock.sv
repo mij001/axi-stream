@@ -1,5 +1,4 @@
 `timescale 1ns / 1ps
-
 // demo 6. a register in the loop does NOT cure a deadlock
 // two masters, both with a registered tvalid, so no combinational path from
 // tready to tvalid at all. each talks to its own cautious but legal slave

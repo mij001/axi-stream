@@ -1,5 +1,4 @@
 `timescale 1ns / 1ps
-
 // demo 3. why the master is forbidden from waiting for tready
 // this master breaks one rule, it will not raise tvalid until it sees tready
 // the slave is cautious but legal, it waits for tvalid before tready
@@ -20,7 +19,7 @@ module broken_master (
         else if (start) have_data <= 1'b1;
     end
 
-    //  THE BUG IS ON THE NEXT LINE. tready appears in the logic that produces tvalid,
+    // THE BUG IS ON THE NEXT LINE. tready appears in the logic that produces tvalid,
     always @(*) begin
         tvalid = have_data && tready;
         tdata  = 8'hA0;
@@ -35,7 +34,7 @@ module cautious_slave (
     output reg         tready,
     input  wire [7:0]  tdata
 );
-    //  this slave is legal. the spec explicitly permits a slave to wait for TVALID
+    // this slave is legal. the spec explicitly permits a slave to wait for TVALID
     always @(*) begin
         tready = tvalid;
     end

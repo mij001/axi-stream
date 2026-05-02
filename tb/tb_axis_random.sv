@@ -29,7 +29,7 @@ module tb_axis_random;
     integer pause_pct;
     integer start_pct;
 
-    //  $random(seed) writes a new value back into seed every call, so the values given
+    // $random(seed) writes a new value back into seed every call, so the values given
     integer seed0;
     integer pause_pct0;
     integer start_pct0;
@@ -88,7 +88,7 @@ module tb_axis_random;
         .tlast   (tlast)
     );
 
-    //  -------------------------------------------------------------------------
+    // random stimulus. driven on the falling edge so that every input is stable long
     always @(negedge aclk) begin
         if (aresetn) begin
             pause <= ({$random(seed)} % 100) < pause_pct;
@@ -96,7 +96,7 @@ module tb_axis_random;
         end
     end
 
-    //  -------------------------------------------------------------------------
+    // scoreboard and coverage, sampled at every rising edge
     always @(posedge aclk) begin
         if (aresetn) begin
             // a request only counts if the master was idle to hear it

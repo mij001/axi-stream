@@ -31,11 +31,11 @@ module tb_axis_basic;
     integer errors;
     integer i;
 
-    //  -------------------------------------------------------------------------
+    // clock. one full period is 10 ns, so a rising edge every 10 ns
     initial aclk = 1'b0;
     always #5 aclk = ~aclk;
 
-    //  -------------------------------------------------------------------------
+    // device under test
     axis_master_basic #(
         .DATA_W  (DATA_W),
         .PKT_LEN (PKT_LEN)
@@ -79,13 +79,13 @@ module tb_axis_basic;
         .tlast   (tlast)
     );
 
-    //  ------------------------------------------------------------------------- Cycle
+    // cycle counter, used only to label the printed log
     always @(posedge aclk or negedge aresetn) begin
         if (!aresetn) cycle <= 0;
         else          cycle <= cycle + 1;
     end
 
-    //  ------------------------------------------------------------------------- One
+    // one printed line per clock cycle. the values printed are the values that existed
     always @(posedge aclk) begin
         if (aresetn) begin
             $display("cyc %0d | start=%b busy=%b | TVALID=%b TREADY=%b TDATA=0x%08h TLAST=%b | %s",
@@ -94,7 +94,7 @@ module tb_axis_basic;
         end
     end
 
-    //  -------------------------------------------------------------------------
+    // independent scoreboard. it watches the same wires the slave watches and checks
     always @(posedge aclk) begin
         if (aresetn && tvalid && tready) begin
             if (tdata !== (32'h000000A0 + (beats_seen % PKT_LEN))) begin
@@ -117,7 +117,7 @@ module tb_axis_basic;
             $display("  >> slave reports packet complete, %0d words", word_count);
     end
 
-    //  -------------------------------------------------------------------------
+    // stimulus
     initial begin
         $dumpfile("sim/tb_axis_basic.vcd");
         $dumpvars(0, tb_axis_basic);
@@ -129,7 +129,7 @@ module tb_axis_basic;
         rd_addr    = 4'd0;
         aresetn    = 1'b0;
 
-        //  hold reset for a few cycles, then release it synchronously after a rising
+        // hold reset for a few cycles, then release it synchronously after a rising
         repeat (3) @(posedge aclk);
         @(negedge aclk);
         aresetn = 1'b1;
@@ -152,7 +152,7 @@ module tb_axis_basic;
         @(posedge aclk);
         start = 1'b0;
 
-        //  let the first transfer go through, then withdraw TREADY for three cycles so
+        // one transfer through, then drop TREADY for three cycles
         @(posedge aclk);
         pause = 1'b1;
         repeat (3) @(posedge aclk);

@@ -1,5 +1,4 @@
 `timescale 1ns / 1ps
-
 // demo 7. the checker catching a bug nobody wrote a test for
 // one wrong line in b2, the beat counter advances every cycle in ST_SEND
 // instead of only on a handshake
@@ -102,3 +101,4 @@ module demo_07_checker_catches;
         $finish;
     end
 endmodule
+

@@ -2,6 +2,7 @@
 
 // passive checker for one link. drives nothing, fits any link
 
+
 module axis_protocol_checker #(
     parameter integer DATA_W = 32,
     parameter         NAME   = "axis"
@@ -57,19 +58,19 @@ module axis_protocol_checker #(
                 errors = errors + 1;
             end
 
-            //  spec 2.7.2 and Figure 2-4: TVALID may only rise at an edge after an
+            // 2.7.2 fig 2-4. tvalid may only rise an edge after reset was already high
             if (!aresetn_prev_q && tvalid === 1'b1) begin
                 $display("[%0t] %s CHECK FAIL: TVALID high on the first edge after reset", $time, NAME);
                 errors = errors + 1;
             end
 
-            //  spec 2.2.1: once TVALID is asserted it must remain asserted until the
+            // spec 2.2.1: TVALID must stay up until the handshake
             if (aresetn_prev_q && tvalid_prev_q && !tready_prev_q && tvalid !== 1'b1) begin
                 $display("[%0t] %s CHECK FAIL: TVALID dropped before the handshake", $time, NAME);
                 errors = errors + 1;
             end
 
-            //  spec 2.2.1, text under Figure 2-1: the information from the master must
+            // spec 2.2.1, text under Figure 2-1: the information from the master must
             if (aresetn_prev_q && tvalid_prev_q && !tready_prev_q && tvalid === 1'b1) begin
                 if (tdata !== tdata_prev_q) begin
                     $display("[%0t] %s CHECK FAIL: TDATA changed while stalled (0x%h -> 0x%h)",

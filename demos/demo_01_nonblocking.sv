@@ -1,5 +1,4 @@
 `timescale 1ns / 1ps
-
 // demonstration one: what the two assignment operators actually do
 // two circuits that look almost identical in the source but are different
 // hardware. run it and compare the printed numbers
@@ -13,13 +12,13 @@ module demo_01_nonblocking;
     initial clk = 1'b0;
     always #5 clk = ~clk;
 
-    //  blocking version. statements run in order, each one finishing before the next
+    // blocking. runs in order, each finishes before the next starts
     always @(posedge clk) begin
         a_blk = b_blk;
         b_blk = a_blk;
     end
 
-    //  nonblocking version. both right hand sides are read first, using the old
+    // nonblocking. both right sides read first with the old values, then assign
     always @(posedge clk) begin
         a_nb <= b_nb;
         b_nb <= a_nb;

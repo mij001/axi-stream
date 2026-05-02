@@ -85,7 +85,7 @@ module tb_slave_equiv;
                 mismatches = mismatches + 1;
             end
 
-            //  count cycles in which the two-flag slave is in a combination the
+            // cycles where the two-flag slave has both flags up
             if (u_b.stall_q && u_b.closing_q)
                 reachable_both_flags = reachable_both_flags + 1;
 

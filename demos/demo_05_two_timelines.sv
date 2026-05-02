@@ -1,5 +1,4 @@
 `timescale 1ns / 1ps
-
 // demo 5. the two timelines
 // one counter, three ways of turning it into an output. they are not the same
 
@@ -9,10 +8,10 @@ module demo_05_two_timelines;
     reg rstn = 1'b0;
     always #5 clk = ~clk;
 
-    //  --------------------------------------------------------------------- The
+    // --------------------------------------------------------------------- the
     reg [3:0] count_q;
 
-    //  the combinational logic that decides what the register becomes next. this is
+    // the combinational logic that decides what the register becomes next this is "next
     wire [3:0] count_d = count_q + 4'd1;
 
     always @(posedge clk or negedge rstn) begin
@@ -20,17 +19,17 @@ module demo_05_two_timelines;
         else       count_q <= count_d;
     end
 
-    //  --------------------------------------------------------------------- Output
+    // --------------------------------------------------------------------- output
     wire [7:0] out_comb = 8'hA0 + {4'd0, count_q};
 
-    //  --------------------------------------------------------------------- Output
+    // --------------------------------------------------------------------- output
     reg [7:0] out_reg_late;
     always @(posedge clk or negedge rstn) begin
         if (!rstn) out_reg_late <= 8'h00;
         else       out_reg_late <= 8'hA0 + {4'd0, count_q};
     end
 
-    //  --------------------------------------------------------------------- Output
+    // --------------------------------------------------------------------- output
     reg [7:0] out_reg_aligned;
     always @(posedge clk or negedge rstn) begin
         if (!rstn) out_reg_aligned <= 8'hA0;

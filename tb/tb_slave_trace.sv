@@ -77,7 +77,7 @@ module tb_slave_trace;
         @(negedge aclk) start = 1'b1;
         @(negedge aclk) start = 1'b0;
 
-        //  wait until the master is offering the TLAST beat to a ready slave, then
+        // wait until the master is offering the TLAST beat to a ready slave, then raise
         while (!(tvalid && tlast && tready_a)) @(negedge aclk);
         pause = 1'b1;
         repeat (3) @(negedge aclk);
