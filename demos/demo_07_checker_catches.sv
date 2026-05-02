@@ -102,3 +102,15 @@ module demo_07_checker_catches;
     end
 endmodule
 
+// the same broken master, seen by the assertions in sva/axis_sva.sv. the hand written
+bind broken_master axis_sva #(
+    .DATA_W (32),
+    .NAME   ("broken")
+) u_sva (
+    .aclk    (aclk),
+    .aresetn (aresetn),
+    .tvalid  (m_axis_tvalid),
+    .tready  (m_axis_tready),
+    .tdata   (m_axis_tdata),
+    .tlast   (m_axis_tlast)
+);
